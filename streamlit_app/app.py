@@ -85,6 +85,7 @@ NAVY_900 = "#000D27"
 NAVY_CARD = "#142038"
 CYAN = "#00b2f0"
 TEXT_SECONDARY = "#9fc3d6"
+TEXT_MUTED = "#5f8598"
 HORIZON_TARGET = {"incremental": 50, "adyacente": 30, "disruptivo": 20}
 FACILITADOR_PIN = "IDEAR"
 
@@ -196,10 +197,29 @@ def inject_css():
         div[data-testid="stButton"] > button[kind="secondary"]:hover {{
             border-color: {CYAN}; color: #f7fcff;
         }}
-        .stCaption, .stCaption p {{ color: {TEXT_SECONDARY} !important; }}
+        .stCaption, .stCaption p {{
+            color: {TEXT_SECONDARY} !important; font-size: 12px !important; font-weight: 600 !important;
+        }}
         div[data-testid="stForm"], .card {{
             background-color: {NAVY_CARD}; border-radius: 22px; padding: 1.5rem;
             border: 1px solid rgba(255,255,255,0.15);
+        }}
+
+        /* Encabezados de sección (los "####") en el estilo "smallhead" original:
+           chicos, en mayúscula, con letra espaciada y color secundario — no
+           como un título normal. Deja el "##" del título grande sin tocar. */
+        h4 {{
+            font-size: 12.5px !important; font-weight: 800 !important;
+            color: {TEXT_SECONDARY} !important; letter-spacing: 0.06em !important;
+            text-transform: uppercase !important; border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding-bottom: 10px; margin-bottom: 4px !important;
+        }}
+
+        /* "Cambiar rol": un link subrayado discreto, no un botón */
+        .st-key-changerole button {{
+            background: none !important; border: none !important; box-shadow: none !important;
+            color: {TEXT_MUTED} !important; font-size: 11px !important; font-weight: 400 !important;
+            text-decoration: underline !important; padding: 0 !important; height: auto !important;
         }}
 
         /* Etiquetas de los campos (antes se veían gris oscuro casi invisibles) */
