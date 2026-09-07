@@ -11,6 +11,7 @@ no es almacenamiento permanente.
 """
 
 import base64
+import html
 import time
 import threading
 from io import BytesIO
@@ -268,6 +269,51 @@ def inject_css():
             100% {{ transform: translateY(-116vh) scale(1); opacity: 0; }}
         }}
         {decision_css}
+
+        /* ===== Tarjeta de calificación del VP (estilo Kahoot) ===== */
+        .st-key-vpcard {{
+            background: linear-gradient(135deg, {NAVY_900} 0%, #0c6fae 52%, {CYAN} 100%) !important;
+            border-radius: 32px !important; padding: 1.4rem 1.5rem 1.7rem !important;
+            max-width: 380px; margin: 0 auto 1.25rem; box-shadow: 0 30px 70px rgba(0,0,0,0.45);
+        }}
+        .vpnotch {{ width: 70px; height: 5px; background: rgba(255,255,255,0.18); border-radius: 100px; margin: 0 auto 1.1rem; }}
+        div[class*="st-key-back_"] button {{
+            width: 28px !important; height: 28px !important; min-height: 28px !important;
+            border-radius: 50% !important; padding: 0 !important;
+            border: 1.5px solid rgba(255,255,255,0.35) !important;
+            background: rgba(4,32,46,0.28) !important; color: #fff !important; font-size: 14px !important;
+        }}
+        .vpprogress {{ display: flex; gap: 6px; margin-top: 7px; }}
+        .vpprogress i {{ flex: 1; height: 4px; border-radius: 100px; background: rgba(255,255,255,0.14); display: block; }}
+        .vpprogress i.done {{ background: {CYAN}; }}
+        .vpprogress i.active {{ background: {CYAN}; opacity: 0.5; }}
+        .vpbadge {{
+            display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.05em;
+            text-transform: uppercase; background: rgba(255,255,255,0.1); color: {TEXT_SECONDARY};
+            padding: 4px 10px; border-radius: 6px; margin: 14px 0 10px;
+        }}
+        .vpqnum {{ font-size: 13px; font-weight: 800; color: var(--accent); letter-spacing: 0.06em; margin: 0 0 6px; }}
+        .vpqname {{ font-size: 23px; font-weight: 900; text-transform: uppercase; line-height: 1.18; margin: 0 0 10px; color: #fff !important; }}
+        .vpqtext {{ font-size: 14px; color: {TEXT_SECONDARY}; line-height: 1.55; margin: 0 0 1.2rem; }}
+        .st-key-optlist div[data-testid="stButton"] > button {{
+            position: relative !important; text-align: left !important; padding-left: 50px !important;
+            display: flex !important; align-items: center !important; min-height: 48px !important;
+        }}
+        .st-key-optlist div[data-testid="stButton"] > button::before {{
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            width: 26px; height: 26px; border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.45);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 800; color: #fff;
+        }}
+        .st-key-optlist > div:nth-child(1) button::before {{ content: "1"; }}
+        .st-key-optlist > div:nth-child(2) button::before {{ content: "2"; }}
+        .st-key-optlist > div:nth-child(3) button::before {{ content: "3"; }}
+        .st-key-optlist > div:nth-child(4) button::before {{ content: "4"; }}
+        .st-key-optlist > div:nth-child(5) button::before {{ content: "5"; }}
+        .st-key-optlist > div:nth-child(2) button, .st-key-optlist > div:nth-child(4) button {{
+            font-style: italic !important; font-weight: 500 !important; color: {TEXT_SECONDARY} !important;
+        }}
         </style>
         """,
         unsafe_allow_html=True,
@@ -382,31 +428,45 @@ def render_vp_view(vp_id):
 
     idx = st.session_state[step_key]
     c = CRITERIA[idx]
+    sel = st.session_state[sel_key]
 
-    st.caption(f"{ini['type']} · {ini['name']}")
-    st.markdown(f"<span style='color:{c['accent']};font-weight:800;'>Pregunta {idx+1} de {len(CRITERIA)}</span>", unsafe_allow_html=True)
-    st.markdown(f"### {c['name'].upper()}")
-    st.write(c["q"])
+    with st.container(key="vpcard"):
+        st.markdown('<div class="vpnotch"></div>', unsafe_allow_html=True)
 
-    cols = st.columns(5)
-    for n in range(1, 6):
-        raw = c["opts"][n - 1]
-        label = raw if raw else "Posición intermedia"
-        if cols[n - 1].button(f"{n}", key=f"opt_{vp_id}_{ini['id']}_{idx}_{n}", help=label, use_container_width=True):
-            st.session_state[sel_key][idx] = n
-            if idx < len(CRITERIA) - 1:
-                st.session_state[step_key] = idx + 1
-            else:
-                sel = st.session_state[sel_key]
-                with state["lock"]:
-                    state["votes"][vote_key] = {"i1": sel[0], "i2": sel[1], "i3": sel[2], "i4": sel[3]}
-            st.rerun()
-    st.caption(" / ".join(f"{n}: {c['opts'][n-1] or 'Posición intermedia'}" for n in range(1, 6)))
+        hcol1, hcol2 = st.columns([1, 5])
+        with hcol1:
+            back_clicked = st.button("←", key=f"back_{vp_id}", disabled=(idx == 0))
+        with hcol2:
+            dots = "".join(
+                f'<i class="{"done" if i < idx else ("active" if i == idx else "")}"></i>'
+                for i in range(len(CRITERIA))
+            )
+            st.markdown(f'<div class="vpprogress">{dots}</div>', unsafe_allow_html=True)
 
-    if idx > 0:
-        if st.button("← Volver", key=f"back_{vp_id}"):
-            st.session_state[step_key] = idx - 1
-            st.rerun()
+        st.markdown(
+            f'<span class="vpbadge">{html.escape(ini["type"])} · {html.escape(ini["name"])}</span>'
+            f'<p class="vpqnum" style="--accent:{c["accent"]}">Pregunta {idx+1} de {len(CRITERIA)}</p>'
+            f'<p class="vpqname">{html.escape(c["name"])}</p>'
+            f'<p class="vpqtext">{html.escape(c["q"])}</p>',
+            unsafe_allow_html=True,
+        )
+
+        with st.container(key="optlist"):
+            for n in range(1, 6):
+                raw = c["opts"][n - 1]
+                label = raw if raw else "Posición intermedia"
+                if st.button(label, key=f"opt_{vp_id}_{ini['id']}_{idx}_{n}", use_container_width=True):
+                    sel[idx] = n
+                    if idx < len(CRITERIA) - 1:
+                        st.session_state[step_key] = idx + 1
+                    else:
+                        with state["lock"]:
+                            state["votes"][vote_key] = {"i1": sel[0], "i2": sel[1], "i3": sel[2], "i4": sel[3]}
+                    st.rerun()
+
+    if back_clicked and idx > 0:
+        st.session_state[step_key] = idx - 1
+        st.rerun()
 
 
 # ============================================================
