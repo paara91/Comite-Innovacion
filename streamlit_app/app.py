@@ -143,6 +143,18 @@ def vp_name(vp_id):
     return next((v["name"] for v in VPS if v["id"] == vp_id), vp_id)
 
 
+_MESES_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
+             "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+
+
+def fecha_es():
+    """Fecha de hoy en español, sin depender del locale del servidor
+    (Streamlit Cloud corre en inglés por defecto — time.strftime('%B') daba
+    'September' en vez de 'septiembre')."""
+    t = time.localtime()
+    return f"{t.tm_mday} de {_MESES_ES[t.tm_mon - 1]} de {t.tm_year}"
+
+
 # ============================================================
 # ESTILO — marca Postobón (navy/cian/Montserrat)
 # ============================================================
@@ -161,7 +173,12 @@ def inject_css():
             border-radius: 10px; border: none;
         }}
         div[data-testid="stButton"] > button[kind="secondary"] {{
-            background-color: transparent; color: #f7fcff; border: 1.5px solid rgba(255,255,255,0.3);
+            background-color: rgba(4,32,46,0.28) !important; color: #f7fcff; font-weight: 700;
+            border: 1.5px solid rgba(255,255,255,0.35); border-radius: 14px;
+            text-align: left; justify-content: flex-start; padding: 13px 16px; transition: border-color .15s;
+        }}
+        div[data-testid="stButton"] > button[kind="secondary"]:hover {{
+            border-color: {CYAN}; color: #f7fcff;
         }}
         .stCaption, .stCaption p {{ color: {TEXT_SECONDARY} !important; }}
         div[data-testid="stForm"], .card {{
@@ -172,8 +189,8 @@ def inject_css():
         .fizz {{ position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }}
         .fizz b {{
             position: absolute; bottom: -8vh; border-radius: 50%;
-            background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.85), rgba(0,178,240,.28) 58%, rgba(0,125,184,.06));
-            border: 1px solid rgba(0,178,240,.28); animation: rise linear infinite; opacity: 0;
+            background: radial-gradient(circle at 40% 35%, rgba(255,255,255,.55), rgba(0,178,240,.22) 45%, transparent 72%);
+            border: none; box-shadow: 0 0 14px rgba(0,178,240,.25); animation: rise linear infinite; opacity: 0;
         }}
         @keyframes rise {{
             0% {{ transform: translateY(0) scale(.6); opacity: 0; }}
@@ -210,7 +227,7 @@ def render_topbar():
     col1, col2 = st.columns([3, 1])
     with col1:
         st.markdown("## COMITÉ DE INNOVACIÓN")
-        st.caption(time.strftime("%d de %B de %Y"))
+        st.caption(fecha_es())
     with col2:
         if logo_b64:
             st.markdown(
@@ -411,7 +428,7 @@ def render_facilitator_reveal():
         hmix = dict(state["horizon_mix"])
         session_id = state.get("session_id")
 
-    fecha = time.strftime("%d de %B de %Y")
+    fecha = fecha_es()
 
     aggs = []
     for ini in iniciativas:
