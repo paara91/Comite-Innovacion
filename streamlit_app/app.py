@@ -257,17 +257,17 @@ def get_logo_b64():
 
 def render_topbar():
     logo_b64 = get_logo_b64()
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown("## COMITÉ DE INNOVACIÓN")
-        st.caption(fecha_es())
-    with col2:
-        if logo_b64:
-            st.markdown(
-                f'<div style="text-align:right;padding-top:10px;">'
-                f'<img src="data:image/png;base64,{logo_b64}" style="height:30px;"></div>',
-                unsafe_allow_html=True,
-            )
+    if logo_b64:
+        # position:fixed (no las columnas de Streamlit, que se apilan en
+        # pantallas angostas) para que el logo quede siempre arriba a la
+        # derecha, sin importar el ancho de pantalla del VP.
+        st.markdown(
+            f'<img src="data:image/png;base64,{logo_b64}" '
+            f'style="position:fixed;top:18px;right:24px;height:28px;z-index:2;">',
+            unsafe_allow_html=True,
+        )
+    st.markdown("## COMITÉ DE INNOVACIÓN")
+    st.caption(fecha_es())
     if st.session_state.get("role"):
         if st.button("Cambiar rol", key="changerole", type="secondary"):
             st.session_state.role = None
