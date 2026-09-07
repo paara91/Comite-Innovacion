@@ -159,6 +159,22 @@ def fecha_es():
 # ESTILO — marca Postobón (navy/cian/Montserrat)
 # ============================================================
 def inject_css():
+    # Cada botón de decisión (Priorizar/Resolver/Banco/No priorizar) debe
+    # verse con SU propio color, igual que en la versión Claude — Streamlit
+    # pone la key del botón como clase "st-key-<key>" en un contenedor
+    # ancestro, así que apuntamos por ahí en vez de por el texto del botón.
+    decision_css = "\n".join(
+        f'''
+        div[class*="_{d["id"]}"] div[data-testid="stButton"] > button {{
+            color: {d["color"]} !important;
+        }}
+        div[class*="_{d["id"]}"] div[data-testid="stButton"] > button[kind="primary"] {{
+            background-color: {d["color"]}22 !important;
+            border: 1.5px solid {d["color"]} !important;
+        }}
+        '''
+        for d in DECISIONES
+    )
     st.markdown(
         f"""
         <style>
@@ -231,6 +247,7 @@ def inject_css():
             90% {{ opacity: .4; }}
             100% {{ transform: translateY(-116vh) scale(1); opacity: 0; }}
         }}
+        {decision_css}
         </style>
         """,
         unsafe_allow_html=True,
