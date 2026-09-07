@@ -163,7 +163,7 @@ def inject_css():
         f"""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap');
-        html, body, [class*="css"], .stMarkdown, .stButton button {{
+        html, body, .stApp, .stApp *:not([data-testid="stIconMaterial"]) {{
             font-family: 'Montserrat', sans-serif !important;
         }}
         .stApp {{ background-color: {NAVY_900}; color: #f7fcff; }}
