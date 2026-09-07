@@ -185,6 +185,31 @@ def inject_css():
             background-color: {NAVY_CARD}; border-radius: 22px; padding: 1.5rem;
             border: 1px solid rgba(255,255,255,0.15);
         }}
+
+        /* Etiquetas de los campos (antes se veían gris oscuro casi invisibles) */
+        [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] label {{
+            color: {TEXT_SECONDARY} !important; font-weight: 700 !important;
+        }}
+        /* Cajas de texto / número / desplegable (antes quedaban blancas por defecto) */
+        div[data-baseweb="input"], div[data-baseweb="select"] > div, div[data-baseweb="textarea"] {{
+            background-color: rgba(255,255,255,0.06) !important;
+            border: 1.5px solid rgba(255,255,255,0.24) !important;
+            border-radius: 10px !important;
+        }}
+        div[data-baseweb="input"] input, div[data-baseweb="select"] div, div[data-baseweb="textarea"] textarea {{
+            color: #f7fcff !important;
+        }}
+        div[data-baseweb="input"] input::placeholder {{ color: {TEXT_SECONDARY} !important; opacity: .8; }}
+        ul[data-testid="stSelectboxVirtualDropdown"] {{ background-color: {NAVY_CARD} !important; }}
+        ul[data-testid="stSelectboxVirtualDropdown"] li {{ color: #f7fcff !important; }}
+        /* Cajas de alerta (st.info) con la marca en vez del azul por defecto */
+        div[data-testid="stAlertContainer"] {{
+            background-color: {NAVY_CARD} !important; border: 1px solid rgba(255,255,255,0.15) !important;
+        }}
+        div[data-testid="stAlertContainer"] p {{ color: #f7fcff !important; }}
+
+        /* Asegura que el contenido de la app quede SIEMPRE encima de las burbujas de fondo */
+        div[data-testid="stAppViewContainer"] {{ position: relative; z-index: 1; }}
         @media (prefers-reduced-motion: reduce) {{ .fizz b {{ animation-duration: .001ms !important; }} }}
         .fizz {{ position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }}
         .fizz b {{
@@ -594,7 +619,11 @@ def main():
     else:
         render_role_picker()
 
-    st_autorefresh(interval=2000, key="autorefresh")
+    # 2s era demasiado agresivo para el plan gratuito de Streamlit Cloud —
+    # saturaba la conexión y causaba desconexiones/reconexiones visibles
+    # (la app se veía "sin estilo" por un instante). 5s sigue sintiéndose
+    # casi en vivo con mucha menos carga.
+    st_autorefresh(interval=5000, key="autorefresh")
 
 
 if __name__ == "__main__":
