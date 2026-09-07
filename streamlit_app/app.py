@@ -190,18 +190,26 @@ def inject_css():
         [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] label {{
             color: {TEXT_SECONDARY} !important; font-weight: 700 !important;
         }}
-        /* Cajas de texto / número / desplegable (antes quedaban blancas por defecto) */
-        div[data-baseweb="input"], div[data-baseweb="select"] > div, div[data-baseweb="textarea"] {{
+        /* Cajas de texto / número / desplegable (antes quedaban blancas por defecto).
+           Streamlit cambió de "data-baseweb" a testids tipo "stXxxRootElement" —
+           cubrimos ambos esquemas (viejo y nuevo) para que sobreviva futuras
+           actualizaciones de Streamlit. */
+        div[data-baseweb="input"], div[data-baseweb="select"] > div, div[data-baseweb="textarea"],
+        div[data-testid$="RootElement"], div[data-testid="stSelectbox"] > div > div,
+        div[data-testid="stNumberInput"] > div > div {{
             background-color: rgba(255,255,255,0.06) !important;
             border: 1.5px solid rgba(255,255,255,0.24) !important;
             border-radius: 10px !important;
         }}
-        div[data-baseweb="input"] input, div[data-baseweb="select"] div, div[data-baseweb="textarea"] textarea {{
+        div[data-baseweb="input"] input, div[data-baseweb="select"] div, div[data-baseweb="textarea"] textarea,
+        div[data-testid$="RootElement"] input, div[data-testid$="RootElement"] *,
+        div[data-testid="stSelectbox"] *, div[data-testid="stNumberInput"] * {{
             color: #f7fcff !important;
         }}
-        div[data-baseweb="input"] input::placeholder {{ color: {TEXT_SECONDARY} !important; opacity: .8; }}
-        ul[data-testid="stSelectboxVirtualDropdown"] {{ background-color: {NAVY_CARD} !important; }}
-        ul[data-testid="stSelectboxVirtualDropdown"] li {{ color: #f7fcff !important; }}
+        div[data-testid$="RootElement"] button {{ background-color: transparent !important; }}
+        input::placeholder, textarea::placeholder {{ color: {TEXT_SECONDARY} !important; opacity: .8; }}
+        ul[data-testid="stSelectboxVirtualDropdown"], div[role="listbox"] {{ background-color: {NAVY_CARD} !important; }}
+        ul[data-testid="stSelectboxVirtualDropdown"] li, div[role="listbox"] * {{ color: #f7fcff !important; }}
         /* Cajas de alerta (st.info) con la marca en vez del azul por defecto */
         div[data-testid="stAlertContainer"] {{
             background-color: {NAVY_CARD} !important; border: 1px solid rgba(255,255,255,0.15) !important;
