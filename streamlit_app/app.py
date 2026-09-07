@@ -263,7 +263,7 @@ def render_topbar():
         # derecha, sin importar el ancho de pantalla del VP.
         st.markdown(
             f'<img src="data:image/png;base64,{logo_b64}" '
-            f'style="position:fixed;top:18px;right:24px;height:28px;z-index:2;">',
+            f'style="position:fixed;top:60px;right:24px;height:28px;z-index:999999;">',
             unsafe_allow_html=True,
         )
     st.markdown("## COMITÉ DE INNOVACIÓN")
