@@ -638,16 +638,13 @@ def render_facilitator_reveal():
     for label, key in [("Incremental", "incremental"), ("Adyacente", "adyacente"), ("Disruptivo", "disruptivo")]:
         target = HORIZON_TARGET[key]
         real = min(max(hmix[key], 0), 100)
-        hmix_rows += f'''
-        <div class="hmix-row">
-          <div class="label-row"><span>{label}</span><b>{hmix[key]}%</b></div>
-          <div class="hmix-track">
-            <div class="hmix-fill" style="width:{real}%;"></div>
-            <div class="hmix-target" style="left:{target}%;"></div>
-            <span class="hmix-target-label" style="left:{target}%;">{target}%</span>
-          </div>
-        </div>
-        '''
+        hmix_rows += (
+            f'<div class="hmix-row"><div class="label-row"><span>{label}</span><b>{hmix[key]}%</b></div>'
+            f'<div class="hmix-track"><div class="hmix-fill" style="width:{real}%;"></div>'
+            f'<div class="hmix-target" style="left:{target}%;"></div>'
+            f'<span class="hmix-target-label" style="left:{target}%;">{target}%</span>'
+            f'</div></div>'
+        )
     st.markdown(f'<div class="hmix">{hmix_rows}</div>', unsafe_allow_html=True)
     st.caption("Línea amarilla = meta corporativa. El dato real lo escribe el facilitador al preparar la sesión.")
 
