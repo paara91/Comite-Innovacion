@@ -87,6 +87,7 @@ NAVY_CARD = "#142038"
 CYAN = "#00b2f0"
 TEXT_SECONDARY = "#9fc3d6"
 TEXT_MUTED = "#5f8598"
+YELLOW = "#ffd400"
 HORIZON_TARGET = {"incremental": 50, "adyacente": 30, "disruptivo": 20}
 FACILITADOR_PIN = "IDEAR"
 
@@ -186,16 +187,18 @@ def inject_css():
         }}
         .stApp {{ background-color: {NAVY_900}; color: #f7fcff; }}
         h1, h2, h3, h4, h5 {{ color: #f7fcff !important; }}
-        div[data-testid="stButton"] > button {{
+        div[data-testid="stButton"] > button, div[data-testid="stDownloadButton"] > button {{
             background-color: {CYAN}; color: {NAVY_900}; font-weight: 800;
             border-radius: 10px; border: none;
         }}
-        div[data-testid="stButton"] > button[kind="secondary"] {{
+        div[data-testid="stButton"] > button[kind="secondary"],
+        div[data-testid="stDownloadButton"] > button[kind="secondary"] {{
             background-color: rgba(4,32,46,0.28) !important; color: #f7fcff; font-weight: 700;
             border: 1.5px solid rgba(255,255,255,0.35); border-radius: 14px;
             text-align: left; justify-content: flex-start; padding: 13px 16px; transition: border-color .15s;
         }}
-        div[data-testid="stButton"] > button[kind="secondary"]:hover {{
+        div[data-testid="stButton"] > button[kind="secondary"]:hover,
+        div[data-testid="stDownloadButton"] > button[kind="secondary"]:hover {{
             border-color: {CYAN}; color: #f7fcff;
         }}
         .stCaption, .stCaption p {{
@@ -313,6 +316,21 @@ def inject_css():
         .st-key-optlist > div:nth-child(5) button::before {{ content: "5"; }}
         .st-key-optlist > div:nth-child(2) button, .st-key-optlist > div:nth-child(4) button {{
             font-style: italic !important; font-weight: 500 !important; color: {TEXT_SECONDARY} !important;
+        }}
+
+        /* ===== Mix de horizonte: barra con marca de meta ===== */
+        .hmix {{ display: flex; flex-direction: column; gap: 12px; max-width: 620px; margin: 0 auto; }}
+        .hmix .label-row {{
+            display: flex; justify-content: space-between; font-size: 13px;
+            color: {TEXT_SECONDARY}; margin-bottom: 5px; font-weight: 600;
+        }}
+        .hmix .label-row b {{ color: #f7fcff; font-weight: 800; }}
+        .hmix-track {{ position: relative; height: 14px; margin-top: 18px; background: rgba(255,255,255,0.22); border-radius: 7px; }}
+        .hmix-fill {{ position: absolute; height: 14px; background: {CYAN}; border-radius: 7px; }}
+        .hmix-target {{ position: absolute; top: -4px; width: 2px; height: 22px; background: {YELLOW}; }}
+        .hmix-target-label {{
+            position: absolute; top: -18px; font-size: 10px; font-weight: 700; color: {YELLOW};
+            transform: translateX(-50%); white-space: nowrap;
         }}
         </style>
         """,
@@ -616,11 +634,22 @@ def render_facilitator_reveal():
         st.write("")
 
     st.markdown("#### Mix de horizonte vs. meta 50/30/20")
+    hmix_rows = ""
     for label, key in [("Incremental", "incremental"), ("Adyacente", "adyacente"), ("Disruptivo", "disruptivo")]:
         target = HORIZON_TARGET[key]
-        st.write(f"**{label}** — real: {hmix[key]}% · meta: {target}%")
-        st.progress(min(max(hmix[key], 0), 100) / 100)
-    st.caption("La meta corporativa (50/30/20) es fija; el dato real lo escribe el facilitador al preparar la sesión.")
+        real = min(max(hmix[key], 0), 100)
+        hmix_rows += f'''
+        <div class="hmix-row">
+          <div class="label-row"><span>{label}</span><b>{hmix[key]}%</b></div>
+          <div class="hmix-track">
+            <div class="hmix-fill" style="width:{real}%;"></div>
+            <div class="hmix-target" style="left:{target}%;"></div>
+            <span class="hmix-target-label" style="left:{target}%;">{target}%</span>
+          </div>
+        </div>
+        '''
+    st.markdown(f'<div class="hmix">{hmix_rows}</div>', unsafe_allow_html=True)
+    st.caption("Línea amarilla = meta corporativa. El dato real lo escribe el facilitador al preparar la sesión.")
 
     st.divider()
 
